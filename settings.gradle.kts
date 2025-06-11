@@ -21,3 +21,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "LocationApp"
 include(":app")
+include(":core")
+include(":domain")
+include(":data")
+include(":features:cities")
+include(":features:details")
+include(":features:map")
