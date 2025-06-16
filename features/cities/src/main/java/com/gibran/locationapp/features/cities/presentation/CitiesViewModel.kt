@@ -7,10 +7,8 @@ import com.gibran.locationapp.domain.usecases.GetCitiesUseCase
 import com.gibran.locationapp.domain.usecases.SearchCitiesUseCase
 import com.gibran.locationapp.domain.usecases.SearchConfig
 import com.gibran.locationapp.domain.usecases.ToggleFavoriteUseCase
-import com.gibran.locationapp.domain.usecases.UpdateCitiesDistanceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,7 +26,6 @@ class CitiesViewModel @Inject constructor(
     private val getCitiesUseCase: GetCitiesUseCase,
     private val searchCitiesUseCase: SearchCitiesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val updateCitiesDistanceUseCase: UpdateCitiesDistanceUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -89,10 +86,6 @@ class CitiesViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
-    init {
-        updateDistances()
-    }
-
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
@@ -137,15 +130,8 @@ class CitiesViewModel @Inject constructor(
         val currentQuery = _searchQuery.value
         _searchQuery.value = ""
         _searchQuery.value = currentQuery
-        updateDistances()
     }
 
-    private fun updateDistances() {
-        viewModelScope.launch {
-            updateCitiesDistanceUseCase()
-                .onFailure { /* Silently handle - non-critical functionality */ }
-        }
-    }
 
     private fun showSuccessMessage(message: String) {
         _successMessage.value = message
