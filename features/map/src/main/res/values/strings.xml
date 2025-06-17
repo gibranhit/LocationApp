@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navigation -->
+    <string name="map_title">Map</string>
+    <string name="back">Back</string>
+    <string name="map_top_app_bar_title">Map</string>
+
+    <!-- Favorites -->
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+
+    <!-- Location Permission -->
+    <string name="map_permission_title">Location Access Required</string>
+    <string name="map_permission_description">To show your location and provide better map experience, please grant location permission.</string>
+    <string name="map_permission_button_text">Grant Location Permission</string>
+    <string name="map_permission_dialog_title">Location Permission Required</string>
+    <string name="map_permission_dialog_message">This app needs location permission to show maps and provide location-based features. Please enable location permission in your device settings.</string>
+    <string name="map_permission_dialog_ok_button">OK</string>
+
+    <!-- City Information -->
+    <string name="map_city_card_latitude_label">Latitude</string>
+    <string name="map_city_card_longitude_label">Longitude</string>
+
+    <!-- Actions -->
+    <string name="retry">Retry</string>
+
+    <!-- Content Descriptions -->
+    <string name="location_icon">Location</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="city_information">City information</string>
+</resources>

@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -9,7 +12,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -23,20 +25,55 @@ android {
             )
         }
     }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    
     kotlinOptions {
         jvmTarget = "11"
+    }
+    
+    buildFeatures {
+        compose = true
     }
 }
 
 dependencies {
+    // Project modules
+    implementation(project(":domain"))
+    implementation(project(":core"))
 
+    // Android core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
+    // Compose UI
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+
+    // ViewModel & Lifecycle
+    implementation(libs.bundles.lifecycle)
+    
+    // Navigation
+    implementation(libs.bundles.navigation)
+
+    // Hilt dependency injection
+    implementation(libs.bundles.hilt)
+    ksp(libs.hilt.compiler)
+
+    // Coroutines
+    implementation(libs.bundles.coroutines)
+
+    // Google Maps
+    implementation(libs.bundles.maps)
+
+    // Testing
+    testImplementation(libs.bundles.testing)
+    androidTestImplementation(libs.bundles.android.testing)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.bundles.compose.testing)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

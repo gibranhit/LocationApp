@@ -1,26 +1,29 @@
 [versions]
 agp = "8.10.1"
-kotlin = "2.1.21"
-ksp = "2.1.21-2.0.1"
+kotlin = "2.1.0"
+ksp = "2.1.0-1.0.29"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.9.1"
-activityCompose = "1.10.1"
-composeBom = "2025.06.00"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.12.01"
 appcompat = "1.7.1"
-hilt = "2.55"
+hilt = "2.54"
 retrofit = "2.11.0"
-okhttp = "4.11.0"
+okhttp = "4.12.0"
 coroutines = "1.9.0"
 serialization = "1.8.0"
 datastore = "1.0.0"
 mockito = "5.5.0"
-room = "2.7.1"
+room = "2.6.1"
 moshi = "1.15.1"
 androidx-hilt = "1.2.0"
-androidx-navigation = "2.9.0"
+androidx-navigation = "2.8.4"
+maps-compose = "2.10.0"
+play-services-maps = "19.0.0"
+runtimeAndroid = "1.8.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +43,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "appcompat" }
 
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt" }
@@ -57,6 +62,7 @@ hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testi
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 retrofit-kotlinx-serialization = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version = "1.0.0" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 # Moshi
@@ -82,6 +88,11 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 # Testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+
+# Google Maps
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "play-services-maps" }
+androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
 
 [bundles]
 # Core Android dependencies
@@ -127,9 +138,10 @@ navigation = [
 ]
 
 # Networking dependencies (Retrofit + OkHttp + Moshi)
-networking = [
+network = [
     "retrofit",
     "retrofit-moshi",
+    "okhttp",
     "okhttp-logging",
     "moshi",
     "moshi-kotlin"
@@ -158,6 +170,12 @@ testing = [
 android-testing = [
     "androidx-junit",
     "androidx-espresso-core"
+]
+
+# Google Maps dependencies
+maps = [
+    "maps-compose",
+    "play-services-maps"
 ]
 
 [plugins]

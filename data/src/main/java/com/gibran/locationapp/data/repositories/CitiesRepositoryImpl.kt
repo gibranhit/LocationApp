@@ -2,6 +2,8 @@ package com.gibran.locationapp.data.repositories
 
 import android.content.Context
 import android.util.Log
+import com.gibran.locationapp.data.di.DefaultDispatcher
+import com.gibran.locationapp.data.di.IoDispatcher
 import com.gibran.locationapp.data.local.dao.CityDao
 import com.gibran.locationapp.data.models.CityDto
 import com.gibran.locationapp.data.models.toDomain
@@ -21,14 +23,15 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.*
 
 @Singleton
 class CitiesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val okHttpClient: OkHttpClient,
     private val moshi: Moshi,
-    private val cityDao: CityDao
+    private val cityDao: CityDao,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : CitiesRepository {
 
     companion object {
@@ -37,6 +40,7 @@ class CitiesRepositoryImpl @Inject constructor(
         private const val CACHE_EXPIRY_DAYS = 7L
         private const val PREFIX_LENGTH = 3
         private const val CHUNK_SIZE = 1000
+        private const val CITIES_URL = "https://gist.githubusercontent.com/hernan-uala/dce8843a8edbe0b0018b32e137bc2b3a/raw/0996accf70cb0ca0e16f9a99e0ee185fafca7af1/cities.json"
     }
 
     private val mutex = Mutex()
@@ -44,7 +48,7 @@ class CitiesRepositoryImpl @Inject constructor(
     private val prefixMap = mutableMapOf<String, MutableList<City>>()
     private var isIndexBuilt = false
     private var isDownloading = false
-    
+
     private val citiesFile = File(context.cacheDir, CITIES_FILE_NAME)
     private val cacheExpiryTime = CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000L
 
@@ -53,7 +57,7 @@ class CitiesRepositoryImpl @Inject constructor(
         .map { entities -> entities.map { it.id }.toSet() }
         .distinctUntilChanged()
 
-    override suspend fun getCities(): Flow<List<City>> = 
+    override suspend fun getCities(): Flow<List<City>> =
         combine(getCitiesDataFlow(), favoritesFlow) { cities, favoriteIds ->
             cities.map { city -> city.copy(isFavorite = favoriteIds.contains(city.id)) }
         }.catch { error ->
@@ -61,7 +65,7 @@ class CitiesRepositoryImpl @Inject constructor(
             emit(emptyList())
         }
 
-    override suspend fun searchCities(query: String): Flow<List<City>> = 
+    override suspend fun searchCities(query: String): Flow<List<City>> =
         combine(getSearchResultsFlow(query), favoritesFlow) { cities, favoriteIds ->
             cities.map { city -> city.copy(isFavorite = favoriteIds.contains(city.id)) }
         }.catch { error ->
@@ -69,14 +73,6 @@ class CitiesRepositoryImpl @Inject constructor(
             emit(emptyList())
         }
 
-    override suspend fun getFavorites(): Flow<List<City>> = 
-        combine(getCitiesDataFlow(), favoritesFlow) { cities, favoriteIds ->
-            cities.filter { favoriteIds.contains(it.id) }
-                .map { city -> city.copy(isFavorite = true) }
-        }.catch { error ->
-            Log.e(TAG, "Error in getFavorites flow", error)
-            emit(emptyList())
-        }
 
     override suspend fun toggleFavorite(cityId: String): Boolean = cityDao.toggleFavorite(cityId)
 
@@ -85,25 +81,11 @@ class CitiesRepositoryImpl @Inject constructor(
         cachedCities.find { it.id == id }?.copy(isFavorite = favoriteIds.contains(id))
     }
 
-    override suspend fun updateDistances(userLatitude: Double, userLongitude: Double) {
-        mutex.withLock {
-            cachedCities = withContext(Dispatchers.Default) {
-                cachedCities.map { city ->
-                    city.copy(distance = calculateDistance(userLatitude, userLongitude, city.latitude, city.longitude))
-                }
-            }
-            
-            if (isIndexBuilt) {
-                withContext(Dispatchers.Default) { buildSearchIndex() }
-            }
-        }
-    }
-
     // Private methods for better organization
 
     private fun getCitiesDataFlow(): Flow<List<City>> = flow {
         val currentCities = mutex.withLock { cachedCities }
-        
+
         if (currentCities.isNotEmpty()) {
             emit(currentCities)
         } else {
@@ -113,7 +95,7 @@ class CitiesRepositoryImpl @Inject constructor(
 
     private fun getSearchResultsFlow(query: String): Flow<List<City>> = flow {
         val cities = mutex.withLock { cachedCities }
-        
+
         when {
             cities.isEmpty() -> emit(emptyList())
             query.isEmpty() -> emit(cities)
@@ -132,7 +114,7 @@ class CitiesRepositoryImpl @Inject constructor(
         return if (shouldDownload) {
             try {
                 Log.d(TAG, "Loading cities...")
-                
+
                 val cities = if (isCacheValid()) {
                     Log.d(TAG, "Loading from cache...")
                     loadCitiesFromFile()
@@ -145,7 +127,7 @@ class CitiesRepositoryImpl @Inject constructor(
                     cachedCities = cities
                 }
 
-                withContext(Dispatchers.Default) {
+                withContext(defaultDispatcher) {
                     buildSearchIndex()
                 }
 
@@ -162,8 +144,8 @@ class CitiesRepositoryImpl @Inject constructor(
 
     private suspend fun performSearch(query: String, cities: List<City>): List<City> {
         ensureSearchIndexBuilt(cities)
-        
-        return withContext(Dispatchers.Default) {
+
+        return withContext(defaultDispatcher) {
             val key = query.take(PREFIX_LENGTH).lowercase()
             prefixMap[key]
                 ?.filter { it.name.startsWith(query, ignoreCase = true) }
@@ -175,7 +157,7 @@ class CitiesRepositoryImpl @Inject constructor(
     private suspend fun ensureSearchIndexBuilt(cities: List<City>) {
         val indexBuilt = mutex.withLock { isIndexBuilt }
         if (!indexBuilt && cities.isNotEmpty()) {
-            withContext(Dispatchers.Default) {
+            withContext(defaultDispatcher) {
                 mutex.withLock {
                     if (!isIndexBuilt && cachedCities.isNotEmpty()) {
                         buildSearchIndex()
@@ -185,11 +167,11 @@ class CitiesRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun downloadAndCacheCities(): List<City> = withContext(Dispatchers.IO) {
+    private suspend fun downloadAndCacheCities(): List<City> = withContext(ioDispatcher) {
         Log.d(TAG, "Downloading cities JSON...")
 
         val request = Request.Builder()
-            .url("https://gist.githubusercontent.com/hernan-uala/dce8843a8edbe0b0018b32e137bc2b3a/raw/0996accf70cb0ca0e16f9a99e0ee185fafca7af1/cities.json")
+            .url(CITIES_URL)
             .build()
 
         okHttpClient.newCall(request).execute().use { response ->
@@ -208,23 +190,23 @@ class CitiesRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun loadCitiesFromFile(): List<City> = withContext(Dispatchers.IO) {
+    private suspend fun loadCitiesFromFile(): List<City> = withContext(ioDispatcher) {
         Log.d(TAG, "Reading from cache...")
-        val jsonString = FileInputStream(citiesFile).use { 
-            it.readBytes().toString(Charsets.UTF_8) 
+        val jsonString = FileInputStream(citiesFile).use {
+            it.readBytes().toString(Charsets.UTF_8)
         }
         parseCitiesFromJson(jsonString)
     }
 
-    private suspend fun parseCitiesFromJson(jsonString: String): List<City> = withContext(Dispatchers.Default) {
+    private suspend fun parseCitiesFromJson(jsonString: String): List<City> = withContext(defaultDispatcher) {
         Log.d(TAG, "Parsing JSON...")
-        
+
         val listType = Types.newParameterizedType(List::class.java, CityDto::class.java)
         val adapter = moshi.adapter<List<CityDto>>(listType)
-        
+
         val cityDtos = adapter.fromJson(jsonString) ?: emptyList()
         Log.d(TAG, "Parsed ${cityDtos.size} cities")
-        
+
         cityDtos.toDomain()
     }
 
@@ -256,20 +238,5 @@ class CitiesRepositoryImpl @Inject constructor(
         
         isIndexBuilt = true
         Log.d(TAG, "Search index built successfully")
-    }
-
-    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val earthRadius = 6371.0 // Earth's radius in kilometers
-        
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-        
-        val a = sin(dLat / 2) * sin(dLat / 2) +
-                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
-                sin(dLon / 2) * sin(dLon / 2)
-        
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        
-        return earthRadius * c
     }
 }

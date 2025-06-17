@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Search and Filter -->
+    <string name="search_cities">Search cities</string>
+    <string name="search_placeholder">Start typing city name…</string>
+    <string name="show_only_favorites">Show only favorites</string>
+    <string name="clear_search">Clear search</string>
+
+    <!-- Loading and Empty States -->
+    <string name="loading_cities">Loading cities…</string>
+    <string name="no_cities_found">No cities found for \"%1$s\"</string>
+    <string name="no_favorite_cities">No favorite cities yet</string>
+    <string name="no_cities_available">No cities available</string>
+    <string name="retry">Retry</string>
+
+    <!-- City List -->
+    <string name="cities_found">%1$d cities found</string>
+    <string name="distance_away">%.1f km away</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="weather_info">View weather information</string>
+
+    <!-- Map Related -->
+    <string name="select_city">Select a City</string>
+    <string name="select_city_description">Choose a city from the list to view it on the map</string>
+    <string name="no_cities_on_map">No cities to show on the map</string>
+    <string name="close">Close</string>
+
+    <!-- Content Descriptions -->
+    <string name="search_icon">Search</string>
+    <string name="location_icon">Location</string>
+    <string name="select_city_icon">Select city</string>
+    <string name="dismiss">Dismiss</string>
+</resources>

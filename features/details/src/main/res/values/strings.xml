@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navigation -->
+    <string name="back">Back</string>
+
+    <!-- Weather Screen -->
+    <string name="weather_title">%1$s Weather</string>
+    <string name="error_loading_weather">Error loading weather</string>
+
+    <!-- Weather Information -->
+    <string name="weather_details">Weather Details</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="last_updated">Last Updated</string>
+
+    <!-- Weather Values -->
+    <string name="temperature_celsius">%1$d°C</string>
+    <string name="humidity_percentage">%1$d%%</string>
+    <string name="wind_speed_ms">%.1f m/s</string>
+
+    <!-- Content Descriptions -->
+    <string name="location">Location</string>
+</resources>

@@ -1,0 +1,13 @@
+<resources>
+    <!-- Location Permission -->
+    <string name="location_access_required">Location Access Required</string>
+    <string name="location_permission_description">To show your location and provide better map experience, please grant location permission.</string>
+    <string name="grant_location_permission">Grant Location Permission</string>
+    <string name="location_permission_required_dialog_title">Location Permission Required</string>
+    <string name="location_permission_required_dialog_text">This app needs location permission to show maps and provide location-based features. Please enable location permission in your device settings.</string>
+    <string name="ok">OK</string>
+
+    <!-- Content Descriptions -->
+    <string name="location_icon">Location</string>
+    <string name="dismiss">Dismiss</string>
+</resources>

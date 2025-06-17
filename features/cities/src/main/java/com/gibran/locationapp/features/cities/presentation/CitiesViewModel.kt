@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.gibran.locationapp.domain.models.City
 import com.gibran.locationapp.domain.usecases.GetCitiesUseCase
 import com.gibran.locationapp.domain.usecases.SearchCitiesUseCase
-import com.gibran.locationapp.domain.usecases.SearchConfig
 import com.gibran.locationapp.domain.usecases.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +17,6 @@ data class CitiesUiState(
     val searchQuery: String = "",
     val showOnlyFavorites: Boolean = false,
     val error: String? = null,
-    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -28,70 +26,52 @@ class CitiesViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
 
-    private val _searchQuery = MutableStateFlow("")
-    private val _showOnlyFavorites = MutableStateFlow(false)
-    private val _isLoading = MutableStateFlow(false)
-    private val _error = MutableStateFlow<String?>(null)
-    private val _successMessage = MutableStateFlow<String?>(null)
-
-    val uiState: StateFlow<CitiesUiState> = combine(
-        _searchQuery, _showOnlyFavorites, _isLoading, _error, _successMessage
-    ) { searchQuery, showOnlyFavorites, isLoading, error, successMessage ->
-        CitiesUiState(
-            searchQuery = searchQuery,
-            showOnlyFavorites = showOnlyFavorites,
-            isLoading = isLoading,
-            error = error,
-            successMessage = successMessage
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CitiesUiState()
-    )
+    private val _uiState = MutableStateFlow(CitiesUiState())
+    val uiState: StateFlow<CitiesUiState> = _uiState.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val cities: StateFlow<List<City>> = combine(
-        _searchQuery, _showOnlyFavorites
-    ) { searchQuery, showOnlyFavorites ->
-        searchQuery to showOnlyFavorites
-    }.flatMapLatest { (searchQuery, showOnlyFavorites) ->
-        _isLoading.value = true
-        _error.value = null
-        
-        val citiesFlow = if (searchQuery.isNotBlank()) {
-            searchCitiesUseCase(SearchConfig(query = searchQuery, sortByRelevance = true))
-        } else {
-            getCitiesUseCase()
-        }
-        
-        citiesFlow.map { allCities ->
-            _isLoading.value = allCities.isEmpty()
+    val cities: StateFlow<List<City>> = _uiState
+        .map { state -> state.searchQuery to state.showOnlyFavorites }
+        .distinctUntilChanged()
+        .flatMapLatest { (searchQuery, showOnlyFavorites) ->
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
-            val filteredCities = if (showOnlyFavorites) {
-                allCities.filter { it.isFavorite }
+            val citiesFlow = if (searchQuery.isNotBlank()) {
+                searchCitiesUseCase(query = searchQuery)
             } else {
-                allCities
+                getCitiesUseCase()
             }
             
-            filteredCities.sortedWith(compareBy<City> { it.name }.thenBy { it.country })
-        }.catch { e ->
-            _error.value = "Failed to load cities: ${e.message}"
-            _isLoading.value = false
-            emit(emptyList())
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = emptyList()
-    )
+            citiesFlow.map { allCities ->
+                val filteredCities = if (showOnlyFavorites) {
+                    allCities.filter { it.isFavorite }
+                } else {
+                    allCities
+                }
+                
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                filteredCities.sortedWith(compareBy<City> { it.name }.thenBy { it.country })
+            }.catch { e ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Failed to load cities: ${e.message}"
+                )
+                emit(emptyList())
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
+        )
 
     fun onSearchQueryChanged(query: String) {
-        _searchQuery.value = query
+        _uiState.value = _uiState.value.copy(searchQuery = query)
     }
 
     fun toggleFavoritesFilter() {
-        _showOnlyFavorites.value = !_showOnlyFavorites.value
+        _uiState.value = _uiState.value.copy(
+            showOnlyFavorites = !_uiState.value.showOnlyFavorites
+        )
     }
 
     fun toggleFavorite(cityId: String) {
@@ -99,47 +79,20 @@ class CitiesViewModel @Inject constructor(
             runCatching {
                 toggleFavoriteUseCase(cityId)
             }.onFailure { e ->
-                _error.value = "Failed to update favorite: ${e.message}"
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to update favorite: ${e.message}"
+                )
             }
         }
     }
 
-    fun addToFavorites(city: City) {
-        if (!city.isFavorite) {
-            toggleFavorite(city.id)
-            showSuccessMessage("${city.name} added to favorites")
-        }
-    }
-
-    fun removeFromFavorites(city: City) {
-        if (city.isFavorite) {
-            toggleFavorite(city.id)
-            showSuccessMessage("${city.name} removed from favorites")
-        }
-    }
-
     fun clearError() {
-        _error.value = null
-    }
-
-    fun clearSuccessMessage() {
-        _successMessage.value = null
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
     fun refreshCities() {
-        val currentQuery = _searchQuery.value
-        _searchQuery.value = ""
-        _searchQuery.value = currentQuery
-    }
-
-
-    private fun showSuccessMessage(message: String) {
-        _successMessage.value = message
-        _error.value = null
-        
-        viewModelScope.launch {
-            kotlinx.coroutines.delay(3000)
-            _successMessage.value = null
-        }
+        val currentQuery = _uiState.value.searchQuery
+        _uiState.value = _uiState.value.copy(searchQuery = "")
+        _uiState.value = _uiState.value.copy(searchQuery = currentQuery)
     }
 }

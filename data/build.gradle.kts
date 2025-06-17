@@ -8,14 +8,19 @@ plugins {
 
 android {
     namespace = "com.gibran.locationapp.data"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "WEATHER_API_KEY", "\"d304c2c0c26211a367ff8ed88db721f5\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -48,11 +53,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Networking (Retrofit + OkHttp + Moshi)
-    implementation(libs.bundles.networking)
+    // Network (Retrofit + OkHttp + Moshi)
+    implementation(libs.bundles.network)
     ksp(libs.moshi.codegen)
 
-    // Room databaseq
+    // Room database
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
 

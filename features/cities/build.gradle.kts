@@ -64,6 +64,9 @@ dependencies {
     // Coroutines
     implementation(libs.bundles.coroutines)
 
+    // Google Maps
+    implementation(libs.bundles.maps)
+
     // Testing
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.bundles.android.testing)

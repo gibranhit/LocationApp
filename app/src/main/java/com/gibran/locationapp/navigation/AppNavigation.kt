@@ -1,6 +1,5 @@
 package com.gibran.locationapp.navigation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -8,6 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.gibran.locationapp.features.cities.presentation.CitiesScreen
+import com.gibran.locationapp.features.details.presentation.WeatherDetailsScreen
+import com.gibran.locationapp.features.map.presentation.MapScreen
+import com.gibran.locationapp.domain.models.City
 import kotlinx.serialization.Serializable
 
 // Define navigation destinations using serializable classes
@@ -18,13 +20,21 @@ object CitiesDestination
 data class MapDestination(
     val latitude: Double,
     val longitude: Double,
-    val cityName: String
+    val cityName: String,
+    val countryCode: String = "",
+    val cityId: String = "",
+    val isFavorite: Boolean = false
 )
 
 @Serializable
-data class CityInfoDestination(
-    val cityId: String,
-    val cityName: String
+data class WeatherDestination(
+    val latitude: Double,
+    val longitude: Double,
+    val cityName: String,
+    val countryCode: String = "",
+    val cityId: String = "",
+    val state: String? = null,
+    val isFavorite: Boolean = false
 )
 
 @Composable
@@ -43,62 +53,59 @@ fun AppNavigation(
                         MapDestination(
                             latitude = city.latitude,
                             longitude = city.longitude,
-                            cityName = city.name
+                            cityName = city.name,
+                            countryCode = city.country,
+                            cityId = city.id,
+                            isFavorite = city.isFavorite
                         )
                     )
                 },
-                onCityInfoClicked = { city ->
+                onWeatherInfoClicked = { city ->
                     navController.navigate(
-                        CityInfoDestination(
+                        WeatherDestination(
+                            latitude = city.latitude,
+                            longitude = city.longitude,
+                            cityName = city.name,
+                            countryCode = city.country,
                             cityId = city.id,
-                            cityName = city.name
+                            state = city.state,
+                            isFavorite = city.isFavorite
                         )
                     )
                 }
             )
         }
         
-        // Map screen (placeholder for now)
+        // Map screen using the actual implementation
         composable<MapDestination> { backStackEntry ->
             val mapDestination = backStackEntry.toRoute<MapDestination>()
             MapScreen(
                 latitude = mapDestination.latitude,
                 longitude = mapDestination.longitude,
                 cityName = mapDestination.cityName,
+                countryCode = mapDestination.countryCode,
+                cityId = mapDestination.cityId,
+                initialIsFavorite = mapDestination.isFavorite,
                 onBackClick = { navController.popBackStack() }
             )
         }
         
-        // City info screen (placeholder for now)
-        composable<CityInfoDestination> { backStackEntry ->
-            val cityInfoDestination = backStackEntry.toRoute<CityInfoDestination>()
-            CityInfoScreen(
-                cityId = cityInfoDestination.cityId,
-                cityName = cityInfoDestination.cityName,
-                onBackClick = { navController.popBackStack() }
+        // Weather details screen
+        composable<WeatherDestination> { backStackEntry ->
+            val weatherDestination = backStackEntry.toRoute<WeatherDestination>()
+            val city = City(
+                id = weatherDestination.cityId,
+                name = weatherDestination.cityName,
+                country = weatherDestination.countryCode,
+                latitude = weatherDestination.latitude,
+                longitude = weatherDestination.longitude,
+                state = weatherDestination.state,
+                isFavorite = weatherDestination.isFavorite
+            )
+            WeatherDetailsScreen(
+                city = city,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }
-}
-
-// Placeholder screens - these would be implemented in their respective feature modules
-@Composable
-private fun MapScreen(
-    latitude: Double,
-    longitude: Double,
-    cityName: String,
-    onBackClick: () -> Unit
-) {
-    // TODO: Implement map screen in features:map module
-    Text("Map Screen for $cityName at $latitude, $longitude")
-}
-
-@Composable
-private fun CityInfoScreen(
-    cityId: String,
-    cityName: String,
-    onBackClick: () -> Unit
-) {
-    // TODO: Implement city info screen in features:details module  
-    Text("City Info Screen for $cityName")
 }

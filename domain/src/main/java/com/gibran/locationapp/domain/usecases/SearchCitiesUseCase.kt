@@ -6,65 +6,54 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-data class SearchConfig(
-    val query: String,
-    val minQueryLength: Int = 1,
-    val sortByRelevance: Boolean = true,
-    val includeFavoritesFirst: Boolean = false
-)
 
 class SearchCitiesUseCase @Inject constructor(
     private val citiesRepository: CitiesRepository
 ) {
-    
-    suspend operator fun invoke(query: String): Flow<List<City>> = 
-        citiesRepository.searchCities(query.trim())
-    
-    suspend operator fun invoke(searchConfig: SearchConfig): Flow<List<City>> {
-        val trimmedQuery = searchConfig.query.trim()
-        
-        if (trimmedQuery.length < searchConfig.minQueryLength) {
-            return citiesRepository.searchCities("")
-        }
-        
-        return citiesRepository.searchCities(trimmedQuery).map { cities ->
-            when {
-                searchConfig.sortByRelevance && searchConfig.includeFavoritesFirst -> 
-                    cities.sortedWith(
-                        compareBy<City> { !it.isFavorite }
-                            .thenBy { getRelevanceScore(it, trimmedQuery) }
-                            .thenBy { it.name }
-                    )
-                searchConfig.sortByRelevance -> 
-                    cities.sortedWith(
-                        compareBy<City> { getRelevanceScore(it, trimmedQuery) }
-                            .thenBy { it.name }
-                    )
-                searchConfig.includeFavoritesFirst -> 
-                    cities.sortedWith(
-                        compareBy<City> { !it.isFavorite }
-                            .thenBy { it.name }
-                    )
-                else -> cities.sortedBy { it.name }
+
+    suspend operator fun invoke(query: String): Flow<List<City>> {
+        val trimmedQuery = query.trim()
+
+        return if (trimmedQuery.isEmpty()) {
+            citiesRepository.getCities().map { cities ->
+                cities.sortedBy { it.name }
+            }
+        } else {
+            citiesRepository.searchCities(trimmedQuery).map { cities ->
+                applyPrefixMatching(cities, trimmedQuery)
             }
         }
     }
-    
-    private fun getRelevanceScore(city: City, query: String): Int {
-        val lowerQuery = query.lowercase()
-        val cityName = city.name.lowercase()
-        val countryName = city.country.lowercase()
-        val stateName = city.state?.lowercase()
-        
-        return when {
-            cityName == lowerQuery || countryName == lowerQuery || stateName == lowerQuery -> 0
-            cityName.startsWith(lowerQuery) -> 1
-            countryName.startsWith(lowerQuery) -> 2
-            stateName?.startsWith(lowerQuery) == true -> 3
-            cityName.contains(lowerQuery) -> 4
-            countryName.contains(lowerQuery) -> 5
-            stateName?.contains(lowerQuery) == true -> 6
-            else -> 7
-        }
+
+    /**
+     * Applies strict prefix matching according to requirements:
+     * - "A" matches "Alabama, US", "Albuquerque, US", etc. but NOT "Sydney, AU"
+     * - "s" matches "Sydney, AU" (case insensitive)
+     * - "Al" matches "Alabama, US" and "Albuquerque, US"
+     * - "Alb" matches only "Albuquerque, US"
+     */
+    private fun applyPrefixMatching(cities: List<City>, query: String): List<City> {
+        return cities.filter { city ->
+            val targetStrings = buildTargetStrings(city)
+
+            targetStrings.any { target ->
+                target.startsWith(query, ignoreCase = true)
+            }
+        }.sortedBy { it.name }
     }
+
+    /**
+     * Builds all possible target strings for a city according to requirements.
+     * Examples: "Alabama, US", "Alabama", etc.
+     */
+    private fun buildTargetStrings(city: City): List<String> {
+        return listOfNotNull(
+            "${city.name}, ${city.country}",
+            city.displayName,
+            city.name,
+            city.state?.let { "${city.name}, $it" },
+            city.state?.let { "${city.name}, $it, ${city.country}" }
+        ).distinct()
+    }
+
 }
