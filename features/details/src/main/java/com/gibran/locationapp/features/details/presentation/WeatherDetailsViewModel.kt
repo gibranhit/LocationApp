@@ -21,11 +21,16 @@ class WeatherDetailsViewModel @Inject constructor(
 
     fun loadWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            // Clear error and set loading state
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             weatherRepository.getWeather(latitude, longitude)
                 .onSuccess { weather ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, weather = weather)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, 
+                        weather = weather,
+                        error = null
+                    )
                 }
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(

@@ -16,7 +16,6 @@ okhttp = "4.12.0"
 coroutines = "1.9.0"
 serialization = "1.8.0"
 datastore = "1.0.0"
-mockito = "5.5.0"
 room = "2.6.1"
 moshi = "1.15.1"
 androidx-hilt = "1.2.0"
@@ -24,6 +23,11 @@ androidx-navigation = "2.8.4"
 maps-compose = "2.10.0"
 play-services-maps = "19.0.0"
 runtimeAndroid = "1.8.2"
+mockk = "1.13.12"
+androidx-arch-core = "2.2.0"
+turbine = "1.0.0"
+robolectric = "4.14.1"
+androidx-test = "1.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -87,7 +91,15 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # Testing
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "androidx-arch-core" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+
+# Testing - Android Tests
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidx-test" }
+
 
 # Google Maps
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
@@ -162,8 +174,9 @@ coroutines = [
 # Testing dependencies
 testing = [
     "junit",
-    "mockito-core",
-    "kotlinx-coroutines-test"
+    "mockk",
+    "kotlinx-coroutines-test",
+    "androidx-arch-core-testing"
 ]
 
 # Android testing dependencies

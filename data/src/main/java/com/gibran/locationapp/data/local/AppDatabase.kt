@@ -4,7 +4,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.gibran.locationapp.data.local.dao.CityDao
 import com.gibran.locationapp.data.local.entities.CityEntity
-import com.gibran.locationapp.data.local.entities.WeatherEntity
 
 @Database(
     entities = [CityEntity::class],

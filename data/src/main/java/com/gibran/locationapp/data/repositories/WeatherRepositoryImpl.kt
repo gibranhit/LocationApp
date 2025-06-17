@@ -1,7 +1,6 @@
 package com.gibran.locationapp.data.repositories
 
 import com.gibran.locationapp.data.di.IoDispatcher
-import com.gibran.locationapp.data.local.entities.WeatherEntity
 import com.gibran.locationapp.data.models.toDomain
 import com.gibran.locationapp.data.remote.WeatherApiService
 import com.gibran.locationapp.domain.models.Weather

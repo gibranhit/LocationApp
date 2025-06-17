@@ -7,6 +7,7 @@ import com.gibran.locationapp.data.local.AppDatabase
 import com.gibran.locationapp.data.local.dao.CityDao
 import com.gibran.locationapp.data.remote.WeatherApiService
 import com.gibran.locationapp.data.repositories.CitiesRepositoryImpl
+import com.gibran.locationapp.data.repositories.CitiesRepositoryImpl.Companion.CITIES_FILE_NAME
 import com.gibran.locationapp.data.repositories.WeatherRepositoryImpl
 import com.gibran.locationapp.domain.repositories.CitiesRepository
 import com.gibran.locationapp.domain.repositories.WeatherRepository
@@ -18,10 +19,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -89,6 +92,10 @@ object DataModule {
     
     @Provides
     fun provideCityDao(database: AppDatabase): CityDao = database.cityDao()
+
+    @Provides
+    @Singleton
+    fun provideFileName(@ApplicationContext context: Context): File = File(context.cacheDir, CITIES_FILE_NAME)
 }
 
 @Module

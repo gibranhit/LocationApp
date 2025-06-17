@@ -71,6 +71,8 @@ dependencies {
 
     // Testing
     testImplementation(libs.bundles.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    
     androidTestImplementation(libs.bundles.android.testing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.compose.testing)

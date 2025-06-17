@@ -26,9 +26,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CitiesRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val citiesFile: File,
     private val okHttpClient: OkHttpClient,
-    private val moshi: Moshi,
     private val cityDao: CityDao,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
@@ -36,7 +35,7 @@ class CitiesRepositoryImpl @Inject constructor(
 
     companion object {
         private const val TAG = "CitiesRepository"
-        private const val CITIES_FILE_NAME = "cities.json"
+        const val CITIES_FILE_NAME = "cities.json"
         private const val CACHE_EXPIRY_DAYS = 7L
         private const val PREFIX_LENGTH = 3
         private const val CHUNK_SIZE = 1000
@@ -49,7 +48,6 @@ class CitiesRepositoryImpl @Inject constructor(
     private var isIndexBuilt = false
     private var isDownloading = false
 
-    private val citiesFile = File(context.cacheDir, CITIES_FILE_NAME)
     private val cacheExpiryTime = CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000L
 
     // Reactive flow observing favorite changes from Room
@@ -202,6 +200,8 @@ class CitiesRepositoryImpl @Inject constructor(
         Log.d(TAG, "Parsing JSON...")
 
         val listType = Types.newParameterizedType(List::class.java, CityDto::class.java)
+        val moshi = Moshi.Builder()
+            .build()
         val adapter = moshi.adapter<List<CityDto>>(listType)
 
         val cityDtos = adapter.fromJson(jsonString) ?: emptyList()

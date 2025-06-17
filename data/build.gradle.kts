@@ -39,6 +39,13 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -72,8 +79,13 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     
     // Testing
+    testImplementation(libs.bundles.testing)
     testImplementation(libs.junit)
-    testImplementation(libs.mockito.core)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.hilt.android.testing)
 }
