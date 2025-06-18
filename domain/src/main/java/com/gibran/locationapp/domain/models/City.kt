@@ -6,13 +6,10 @@ data class City(
     val country: String,
     val latitude: Double,
     val longitude: Double,
-    val state: String? = null,
-    val subcountry: String? = null,
     var isFavorite: Boolean = false,
-    var distance: Double? = null
 ) {
     val displayName: String
-        get() = if (state != null) "$name, $state" else "$name, $country"
+        get() = "$name, $country"
     
     val coordinates: String
         get() = String.format("%.4f, %.4f", latitude, longitude)

@@ -33,7 +33,6 @@ data class WeatherDestination(
     val cityName: String,
     val countryCode: String = "",
     val cityId: String = "",
-    val state: String? = null,
     val isFavorite: Boolean = false
 )
 
@@ -68,7 +67,6 @@ fun AppNavigation(
                             cityName = city.name,
                             countryCode = city.country,
                             cityId = city.id,
-                            state = city.state,
                             isFavorite = city.isFavorite
                         )
                     )
@@ -99,7 +97,6 @@ fun AppNavigation(
                 country = weatherDestination.countryCode,
                 latitude = weatherDestination.latitude,
                 longitude = weatherDestination.longitude,
-                state = weatherDestination.state,
                 isFavorite = weatherDestination.isFavorite
             )
             WeatherDetailsScreen(

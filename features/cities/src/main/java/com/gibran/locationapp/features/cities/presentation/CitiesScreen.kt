@@ -43,6 +43,34 @@ fun CitiesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cities by viewModel.cities.collectAsStateWithLifecycle()
+    
+    CitiesScreenContent(
+        modifier = modifier,
+        uiState = uiState,
+        cities = cities,
+        onCityClicked = onCityClicked,
+        onWeatherInfoClicked = onWeatherInfoClicked,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onToggleFavoritesFilter = viewModel::toggleFavoritesFilter,
+        onToggleFavorite = viewModel::toggleFavorite,
+        onRefresh = viewModel::refreshCities,
+        onClearError = viewModel::clearError
+    )
+}
+
+@Composable
+fun CitiesScreenContent(
+    modifier: Modifier = Modifier,
+    uiState: CitiesUiState,
+    cities: List<City>,
+    onCityClicked: (City) -> Unit = {},
+    onWeatherInfoClicked: (City) -> Unit = {},
+    onSearchQueryChanged: (String) -> Unit = {},
+    onToggleFavoritesFilter: () -> Unit = {},
+    onToggleFavorite: (String) -> Unit = {},
+    onRefresh: () -> Unit = {},
+    onClearError: () -> Unit = {}
+) {
     val configuration = LocalConfiguration.current
     
     // State for selected city in landscape mode
@@ -54,14 +82,14 @@ fun CitiesScreen(
             Column(modifier = Modifier.weight(1f)) {
                 SearchAndFilterBar(
                     uiState = uiState,
-                    onSearchQueryChanged = viewModel::onSearchQueryChanged,
-                    onToggleFavoritesFilter = viewModel::toggleFavoritesFilter,
+                    onSearchQueryChanged = onSearchQueryChanged,
+                    onToggleFavoritesFilter = onToggleFavoritesFilter,
                     modifier = Modifier.padding(Dimens.spacingLarge)
                 )
 
                 MessageSection(
                     uiState = uiState,
-                    onClearError = viewModel::clearError,
+                    onClearError = onClearError,
                 )
 
                 CitiesContent(
@@ -71,8 +99,8 @@ fun CitiesScreen(
                         selectedCity = city
                     },
                     onWeatherInfoClicked = onWeatherInfoClicked,
-                    onToggleFavorite = viewModel::toggleFavorite,
-                    onRefresh = viewModel::refreshCities,
+                    onToggleFavorite = onToggleFavorite,
+                    onRefresh = onRefresh,
                     selectedCity = selectedCity
                 )
             }
@@ -131,14 +159,14 @@ fun CitiesScreen(
         Column(modifier = modifier.fillMaxSize()) {
             SearchAndFilterBar(
                 uiState = uiState,
-                onSearchQueryChanged = viewModel::onSearchQueryChanged,
-                onToggleFavoritesFilter = viewModel::toggleFavoritesFilter,
+                onSearchQueryChanged = onSearchQueryChanged,
+                onToggleFavoritesFilter = onToggleFavoritesFilter,
                 modifier = Modifier.padding(Dimens.spacingLarge)
             )
 
             MessageSection(
                 uiState = uiState,
-                onClearError = viewModel::clearError,
+                onClearError = onClearError,
             )
 
             CitiesContent(
@@ -146,8 +174,8 @@ fun CitiesScreen(
                 cities = cities,
                 onCityClicked = onCityClicked,
                 onWeatherInfoClicked = onWeatherInfoClicked,
-                onToggleFavorite = viewModel::toggleFavorite,
-                onRefresh = viewModel::refreshCities
+                onToggleFavorite = onToggleFavorite,
+                onRefresh = onRefresh
             )
         }
     }
@@ -171,7 +199,7 @@ private fun MessageSection(
 }
 
 @Composable
-private fun CitiesContent(
+fun CitiesContent(
     uiState: CitiesUiState,
     cities: List<City>,
     onCityClicked: (City) -> Unit,
@@ -364,14 +392,6 @@ private fun CityItem(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
-                city.distance?.let { distance ->
-                    Text(
-                        text = stringResource(R.string.distance_away, distance),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Dimens.spacingXs),
@@ -501,9 +521,7 @@ private val sampleCities = listOf(
         country = "US",
         latitude = 40.7128,
         longitude = -74.0060,
-        state = "New York",
         isFavorite = true,
-        distance = 125.5
     ),
     City(
         id = "2",
@@ -512,7 +530,6 @@ private val sampleCities = listOf(
         latitude = 51.5074,
         longitude = -0.1278,
         isFavorite = false,
-        distance = 587.2
     ),
     City(
         id = "3",
@@ -521,7 +538,6 @@ private val sampleCities = listOf(
         latitude = 48.8566,
         longitude = 2.3522,
         isFavorite = true,
-        distance = 789.1
     ),
     City(
         id = "4",
@@ -530,7 +546,6 @@ private val sampleCities = listOf(
         latitude = 35.6762,
         longitude = 139.6503,
         isFavorite = false,
-        distance = 1250.7
     )
 )
 

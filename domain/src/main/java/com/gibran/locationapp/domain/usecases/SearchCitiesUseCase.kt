@@ -50,9 +50,7 @@ class SearchCitiesUseCase @Inject constructor(
         return listOfNotNull(
             "${city.name}, ${city.country}",
             city.displayName,
-            city.name,
-            city.state?.let { "${city.name}, $it" },
-            city.state?.let { "${city.name}, $it, ${city.country}" }
+            city.name
         ).distinct()
     }
 

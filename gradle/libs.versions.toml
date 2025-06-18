@@ -28,6 +28,7 @@ androidx-arch-core = "2.2.0"
 turbine = "1.0.0"
 robolectric = "4.14.1"
 androidx-test = "1.6.1"
+uiautomator = "2.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +52,7 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "androidx-navigation" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx-hilt" }
 
 # ViewModel
@@ -99,7 +101,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 # Testing - Android Tests
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidx-test" }
-
+uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 
 # Google Maps
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
@@ -182,7 +184,9 @@ testing = [
 # Android testing dependencies
 android-testing = [
     "androidx-junit",
-    "androidx-espresso-core"
+    "androidx-espresso-core",
+    "androidx-navigation-testing",
+    "uiautomator"
 ]
 
 # Google Maps dependencies

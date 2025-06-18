@@ -22,6 +22,7 @@ import com.gibran.locationapp.domain.models.City
 import com.gibran.locationapp.domain.models.Weather
 import com.gibran.locationapp.features.details.R
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherDetailsScreen(
@@ -36,6 +37,26 @@ fun WeatherDetailsScreen(
         viewModel.loadWeather(city.latitude, city.longitude)
     }
 
+    WeatherDetailsContent(
+        city = city,
+        isLoading = uiState.isLoading,
+        weather = uiState.weather,
+        error = uiState.error,
+        onNavigateBack = onNavigateBack,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WeatherDetailsContent(
+    city: City,
+    isLoading: Boolean,
+    weather: Weather?,
+    error: String?,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -64,7 +85,7 @@ fun WeatherDetailsScreen(
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
             
             // Weather Content
-            if (uiState.isLoading){
+            if (isLoading){
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
@@ -73,11 +94,11 @@ fun WeatherDetailsScreen(
                 }
             }
 
-            uiState.weather?.let {
+            weather?.let {
                 WeatherContent(weather = it)
             }
 
-            uiState.error?.let{
+            error?.let{
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -142,7 +163,7 @@ private fun CityInfoCard(
 }
 
 @Composable
-private fun WeatherContent(
+fun WeatherContent(
     weather: Weather,
     modifier: Modifier = Modifier
 ) {

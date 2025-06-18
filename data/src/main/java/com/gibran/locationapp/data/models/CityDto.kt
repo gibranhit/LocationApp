@@ -10,8 +10,6 @@ data class CityDto(
     @Json(name = "name") val name: String,
     @Json(name = "country") val country: String,
     @Json(name = "coord") val coord: CoordDto,
-    @Json(name = "state") val state: String? = null,
-    @Json(name = "subcountry") val subcountry: String? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -28,8 +26,6 @@ fun CityDto.toDomain(): City {
         country = country,
         latitude = coord.latitude,
         longitude = coord.longitude,
-        state = state,
-        subcountry = subcountry
     )
 }
 
