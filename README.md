@@ -26,6 +26,13 @@ name with real-time filtering, favorites management, and intelligent caching.
 - Weather icons and detailed meteorological data
 - Error handling for weather API failures
 
+### 🎨 Core UI System (`core`)
+
+- Shared UI components and design system
+- Common error handling and loading states
+- Location permission management
+- Consistent spacing and theming across features
+
 ## Demo
 
 ![App Demo_Portrait](screenshots/maps%20portrait.gif)
@@ -94,6 +101,21 @@ across three main layers:
 - **WeatherDetailsScreen**: Clean weather information display
 - **WeatherRepository**: Weather API integration with error handling
 - Supports multiple weather providers through repository pattern
+
+### Core UI System (`core`)
+
+- **CommonComponents**: Reusable UI elements for consistent experience
+    - `ErrorCard`: Standardized error display with dismiss functionality
+    - `ErrorCardWithRetry`: Error display with retry action
+    - `LoadingIndicator`: Consistent loading states across features
+- **PermissionComponents**: Location permission handling
+    - `LocationPermissionHandler`: Composable for managing location permissions
+    - `LocationPermissionRequestUI`: User-friendly permission request interface
+    - `PermissionRationaleDialog`: Educational dialog for permission rationale
+- **Theme System**: Centralized design tokens
+    - `Dimens`: Consistent spacing scale (4dp to 64dp)
+    - Shared constants for UI measurements
+    - Coordinate formatting utilities
 
 ## Responsive UI Implementation
 
@@ -249,6 +271,17 @@ val cities: StateFlow<List<City>> = _uiState
 - **Development Efficiency**: Single codebase handles multiple layouts
 - **Future-proof**: Easily adaptable to tablets and foldable devices
 
+### 7. Shared Core Module
+
+**Decision**: Create a dedicated core module for shared UI components and utilities
+**Rationale**:
+
+- **Consistency**: Ensures uniform UI/UX across all features
+- **Reusability**: Reduces code duplication and maintenance overhead
+- **Design System**: Centralized theme and spacing management
+- **Testability**: Shared components can be unit tested independently
+- **Scalability**: Easy to extend with new shared utilities
+
 ## Important Assumptions
 
 ### 1. Data Source Assumptions
@@ -332,3 +365,4 @@ weather features provides a comprehensive location-based experience. The respons
 optimal usability across different device orientations, with the landscape mode offering a
 particularly enhanced experience through its split-screen layout. The system supports future
 enhancements and can scale to handle larger datasets with minimal modifications.
+
